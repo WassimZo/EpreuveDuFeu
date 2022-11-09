@@ -49,7 +49,8 @@ def extractForm(toFind) :
 
 def formExist(row, column,board, toFind, form) :
    for coordinates in form :
-      if board[row+coordinates[0]][column+coordinates[1]] != toFind[coordinates[0]][coordinates[1]] :
+      x, y = coordinates
+      if row+x < len(board) and column+y < len(board[0]) and board[row+x][column+y] != toFind[x][y] :
          return False  
    return True         
 
@@ -58,22 +59,22 @@ def compareMatrix(board, toFind, form) :
    boardHeight = len(board)
    toFindWidth = len(toFind[0])
    toFindHeigth = len(toFind)
+   forms = []
 
    if toFindWidth > boardWidth or toFindHeigth > boardHeight :
       return "Introuvable"
    
-   row = 0
-   for line in board :
-      column = 0
-      for value in line :
+   for row in range(len(board)) :
+      for column in range(len(board[0])) :
          if formExist(row, column, board, toFind, form) : 
-            buildResultMatrix(row, column, board, form)
-            return "Trouvé ! \nCoordonnées : %i, %i" %(column, row)
-         else :
-            board[row][column] = '-'
-         column = column+1
-      row = row+1
-   return "Introuvable"
+            forms.append([row, column])
+   if forms :
+      selectedForm = getTopRightForm(forms)
+      formRow, formCol = selectedForm
+      buildResultMatrix(formRow, formCol, board, form)
+      return "Trouvé ! \nCoordonnées : %i, %i" %(formCol, formRow)
+   else :
+      return "Introuvable"
 
 def buildResultMatrix(row, column, board, form) :
    global resultMatrix
@@ -84,8 +85,19 @@ def buildResultMatrix(row, column, board, form) :
          noVal.append('-')
       resultMatrix.append(noVal)
    for coordinates in form :
-      resultMatrix[row+coordinates[0]][column+coordinates[1]] = board[row+coordinates[0]][column+coordinates[1]]
+      x, y = coordinates
+      resultMatrix[row+x][column+y] = board[row+x][column+y]
 
+def getTopRightForm(forms) :
+   maxRight = forms[0][0]
+   maxTop = forms[0][0] 
+   for form in forms :
+      x, y = form
+      if x < maxRight :
+         maxRight = x 
+      if y > maxTop :
+         maxTop = y
+   return [maxRight, maxTop]
 
 def printResultMatrix(resultMatrix) :
    result = ""
